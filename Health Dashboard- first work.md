@@ -3,7 +3,7 @@
 ## Business Problem
 Analiza wpływu czynników psychicznych (stress, mindfulness, smoking) na stan zdrowia.
 
-## 🗂 Dane i model
+## Dane i model
 Dane pochodzą z serwisu Kaggle (Holistic Health & Lifestyle Score Dataset). Tabela zawierała następujące kolumny:
 -Physical_Activity	
 -Nutrition_Score	

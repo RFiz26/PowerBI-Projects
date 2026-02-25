@@ -17,5 +17,5 @@ Analiza wpływu czynników psychicznych (stress, mindfulness, smoking) na stan z
 - Wyższe wyniki mental well-being korelują z lepszym stanem zdrowia we wszystkich kategoriach BMI  
 - Osoby ze złym stanem zdrowia mają wyższy poziom stresu i niższy mindfulness
 
-![PowerBI-Projects](images/Health-first dashboard.png)
-Image/Health-first dashboard.png
+![PowerBI-Projects](Image/Health-first dashboard.png)
+

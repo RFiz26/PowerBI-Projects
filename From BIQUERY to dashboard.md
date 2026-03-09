@@ -1,7 +1,7 @@
 # Wprowadzenie. 
 Postanowiłam zapisać tu wszystkie kroki, które wykonałam podczas stworzenia tego projektu. 
 
-## 1. Przegląd zbioru danych: TheLook eCommerce
+## 1. Przegląd zbioru danych: TheLook eCommerce, czyli Eksploracyjna Analiza Danych (EDA)
 
 Projekt opiera się na publicznym zbiorze danych `thelook_ecommerce` w Google BigQuery. Jest to syntetyczny zbiór danych zawierający informacje o operacjach fikcyjnego sklepu odzieżowego online.
 
@@ -22,3 +22,60 @@ Wszystkie tabele są ze sobą powiązane za pomocą unikalnych identyfikatorów 
 * `user_id` łączy klientów z ich zamówieniami i aktywnością na stronie.
 * `product_id` pozwala przypisać szczegóły produktu do konkretnej pozycji w koszyku.
 * `order_id` grupuje wiele produktów w jedno zamówienie.
+
+## 2. Cele biznesowe i pytania analityczne
+
+Zanim przystąpiłam do analizy technicznej w SQL, zdefiniowałam główne cele biznesowe, które pomogą ocenić kondycję sklepu TheLook eCommerce. Moja analiza skupia się na trzech kluczowych obszarach:
+
+### I. Rentowność i Asortyment (Profitability)
+* **Cel:** Zidentyfikowanie najbardziej zyskownych kategorii produktów.
+* **Pytanie biznesowe:** Które kategorie produktów generują największą marżę (różnica między ceną sprzedaży a kosztem zakupu)?
+* **Kluczowe metryki:** Total Profit, Profit Margin per Category.
+
+### II. Efektywność Marketingowa (Customer Acquisition)
+* **Cel:** Ocena wartości klientów w zależności od źródła ich pozyskania.
+* **Pytanie biznesowe:** Które źródło ruchu (`traffic_source`) sprowadza klientów o najwyższej średniej wartości zamówienia (AOV)?
+* **Kluczowe metryki:** Average Order Value (AOV), User Count per Source.
+
+### III. Optymalizacja Operacyjna (Returns Analysis)
+* **Cel:** Zmniejszenie strat wynikających ze zwrotów towarów.
+* **Pytanie biznesowe:** Które marki lub kategorie produktów charakteryzują się najwyższym współczynnikiem zwrotów?
+* **Kluczowe metryki:** Return Rate (%), Total Returns.
+
+## 3.I. Transformacja i Agregacja Danych (SQL)
+
+### Notatnik techniczny: Analiza Rentowności
+**Zadanie:** Obliczenie zysku i marży procentowej dla każdej kategorii i marki.
+**Logika:** - Połączyłam tabele `products` i `order_items`.
+* Wykluczyłam zamówienia anulowane i zwrócone, aby uzyskać realny obraz finansowy.
+* Obliczyłam marżę jako `(Suma Cena - Suma Koszt) / Suma Cena *100%`.
+* Wszystkie sumy są zaokrąglone do 2 miejsc po przecinku ROUND(...,2), ponieważ cena nie może być inna
+* Sortujemy od najwyższego zysku, aby zobaczyć, jakiego rodzaju produkty przynoszą największą marże
+
+```
+SELECT 
+  p.category AS kategoria,
+  p.brand AS marka,
+  ROUND(SUM(p.retail_price), 2) AS przychod_razem,
+  ROUND(SUM(p.cost), 2) AS koszt_razem,
+  ROUND(SUM(p.retail_price - p.cost), 2) AS zysk_razem,
+  ROUND(SAFE_DIVIDE(SUM(p.retail_price - p.cost), SUM(p.retail_price)) * 100, 2) AS procent_marzy
+FROM `bigquery-public-data.thelook_ecommerce.products` AS p
+JOIN `bigquery-public-data.thelook_ecommerce.order_items` AS oi 
+  ON p.id = oi.product_id
+WHERE oi.status NOT IN ('Cancelled', 'Returned') -- Liczymy tylko faktyczną sprzedaż
+GROUP BY 1, 2 -- (lub GROUP BY p.category, p.brand)
+ORDER BY zysk_razem DESC
+```
+  
+  **Wynik został zapisany jako widok (Save View), który można odczytać w Power Query**
+
+Zamiast przesyłać miliony wierszy surowych danych do Power BI, wykonałam agregację po stronie BigQuery. Przygotowałam dedykowany widok SQL, który przelicza marżę na poziomie kategorii i marki, co optymalizuje czas odświeżania raportu.
+
+**Ważne** :W tym przypadku można zrobić dashboard na płaskiej tabeli (flat table)!
+
+## 4.I. Prezentacja danych w Power Bi
+### Załadowanie danych do Power Query
+Po połączeniu bazy BigQuery z Power BI Desktop zostały ściągnięte dane do Power Query. Następnie zostały sprawdzone dane za pomocą funkcji znajdujących się w zakładce Widok. Dane zostały 
+<img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/0c9daf49-d34f-4d48-bb32-d82b7ab29c19" />
+

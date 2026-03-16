@@ -72,10 +72,17 @@ ORDER BY zysk_razem DESC
 
 Zamiast przesyłać miliony wierszy surowych danych do Power BI, wykonałam agregację po stronie BigQuery. Przygotowałam dedykowany widok SQL, który przelicza marżę na poziomie kategorii i marki, co optymalizuje czas odświeżania raportu.
 
-**Ważne** :W tym przypadku można zrobić dashboard na płaskiej tabeli (flat table)!
-
 ## 4.I. Prezentacja danych w Power Bi
 ### Załadowanie danych do Power Query
-Po połączeniu bazy BigQuery z Power BI Desktop zostały ściągnięte dane do Power Query. Następnie zostały sprawdzone dane za pomocą funkcji znajdujących się w zakładce Widok. Dane zostały 
+Po połączeniu bazy BigQuery z Power BI Desktop zostały ściągnięte dane do Power Query. Następnie zostały sprawdzone dane za pomocą funkcji znajdujących się w zakładce Widok, co zostało przedstawione poniżej.  
 <img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/0c9daf49-d34f-4d48-bb32-d82b7ab29c19" />
+Na postawie tych danych można zauważyć pare rzeczy:
+  *Nie zaobserwowano żadnych błędów, ani pustych kolumn.
+  *W kategorii `przychod_razem`, `koszt_razem` i `zysk_razem` wartości minumalna i maksymalna jest większa od zera, co jako wartość pieniężna jest istotna.
+  *W kolumnie `procent_marzy` wartości zawierają się w przedziale 36.9-65.7, co wygląda na prawidłowe dane.
+  * `kategoria` zawiera w sobie 25 kategorii, które się powtarzają(25 wartości odrębnych, 0 unikatowych. Do zoptymaliwania analizy należy przenieść te dane do osobnej tablicy ( tablica wymiarów)
+  *`marka` występuje znacznie więcej wartości odrębnych niż kolumna kategoria, do tego większa część tych danych występuje tylko raz ( 431 wartości unikatowych). Jednak z powodu tego, że jest to tekst(Power BI i Power Query używają silnika kolumnowego (VertiPaq). Ten silnik uwielbia liczby, a nie przepada za długimi tekstami.) należy przenieść te dane do tablicy wymiaru. Przez dużą różnice między danymi w kolumnie `kategoria` i `marka` zostaną stworzone dwie tabele wymiaru
+
+Po stworzeniu tabel dla kategorii i marki, oraz odpowiednich id w tych tabelach i w tabeli faktu 
+<img width="995" height="722" alt="image" src="https://github.com/user-attachments/assets/6003e363-83c6-464f-a14d-208aece233d2" />
 

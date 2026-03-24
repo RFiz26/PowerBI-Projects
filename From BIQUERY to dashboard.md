@@ -73,16 +73,56 @@ ORDER BY zysk_razem DESC
 Zamiast przesyłać miliony wierszy surowych danych do Power BI, wykonałam agregację po stronie BigQuery. Przygotowałam dedykowany widok SQL, który przelicza marżę na poziomie kategorii i marki, co optymalizuje czas odświeżania raportu.
 
 ## 4.I. Prezentacja danych w Power Bi
-### Załadowanie danych do Power Query
-Po połączeniu bazy BigQuery z Power BI Desktop zostały ściągnięte dane do Power Query. Następnie zostały sprawdzone dane za pomocą funkcji znajdujących się w zakładce Widok, co zostało przedstawione poniżej.  
+### Proces ETL i przygotowanie danych w Power Query
+Po nawiązaniu połączenia między bazą BigQuery a Power BI Desktop, dane zostały zaimportowane do edytora Power Query. 
 <img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/0c9daf49-d34f-4d48-bb32-d82b7ab29c19" />
-Na postawie tych danych można zauważyć pare rzeczy:
-  *Nie zaobserwowano żadnych błędów, ani pustych kolumn.
-  *W kategorii `przychod_razem`, `koszt_razem` i `zysk_razem` wartości minumalna i maksymalna jest większa od zera, co jako wartość pieniężna jest istotna.
-  *W kolumnie `procent_marzy` wartości zawierają się w przedziale 36.9-65.7, co wygląda na prawidłowe dane.
-  * `kategoria` zawiera w sobie 25 kategorii, które się powtarzają(25 wartości odrębnych, 0 unikatowych. Do zoptymaliwania analizy należy przenieść te dane do osobnej tablicy ( tablica wymiarów)
-  *`marka` występuje znacznie więcej wartości odrębnych niż kolumna kategoria, do tego większa część tych danych występuje tylko raz ( 431 wartości unikatowych). Jednak z powodu tego, że jest to tekst(Power BI i Power Query używają silnika kolumnowego (VertiPaq). Ten silnik uwielbia liczby, a nie przepada za długimi tekstami.) należy przenieść te dane do tablicy wymiaru. Przez dużą różnice między danymi w kolumnie `kategoria` i `marka` zostaną stworzone dwie tabele wymiaru
+Kolejnym krokiem była weryfikacja jakości danych przy użyciu narzędzi dostępnych w zakładce Widok (Profilowanie danych), co pozwoliło na wyciągnięcie następujących wniosków:
 
-Po stworzeniu tabel dla kategorii i marki, oraz odpowiednich id w tych tabelach i w tabeli faktu 
+  * **Jakość danych**: Nie zaobserwowano błędów ani pustych wartości (null) w kluczowych kolumnach.
+
+  * **Poprawność finansowa**: W kolumnach przychod_razem, koszt_razem oraz zysk_razem wartości minimalne i maksymalne są większe od zera, co potwierdza logiczną spójność danych sprzedażowych.
+
+  * **Wskaźniki rentowności**: Wartości w kolumnie procent_marzy mieszczą się w przedziale 36.9% – 65.7%, co jest wynikiem realistycznym dla analizowanego modelu biznesowego.
+
+  * **Optymalizacja modelu (Star Schema)**: * Kolumna kategoria zawiera 25 powtarzających się wartości odrębnych (0 unikatowych).
+
+      * Kolumna marka charakteryzuje się znacznie większą kardynalnością (431 wartości unikatowych).
+
+      * **Decyzja projektowa**: Ze względu na to, że silnik kolumnowy VertiPaq (wykorzystywany przez Power BI) znacznie wydajniej przetwarza liczby niż długie ciągi tekstowe, podjęto decyzję o znormalizowaniu modelu. Dane dotyczące kategorii i marek zostały przeniesione do osobnych tabel wymiarów, co zoptymalizowało wydajność analizy.
+
+### Modelowanie danych
+
+Po wyodrębnieniu tabel wymiarów (`Kategoria` oraz `Marka`) i przypisaniu im kluczy głównych, zostały one połączone z tabelą faktów relacją jeden do wielu (1:*). Poniższy schemat przedstawia strukturę modelu:
 <img width="995" height="722" alt="image" src="https://github.com/user-attachments/assets/6003e363-83c6-464f-a14d-208aece233d2" />
+
+### Implementacja miar DAX
+W celu przeprowadzenia rzetelnej analizy rentowności, stworzono trzy kluczowe miary:
+  1. **Total Profit**(Sumaryczny zysk firmy):
+    
+  $$Total Profit = SUM(Fakt_table[zysk_razem])$$
+
+  2. **Total Revenue**(Sumaryczny przychód firmy):
+    
+  $$Total Revenue = SUM(Fakt_table[przychod_razem])$$
+
+  3. **Profit Margin %**(Procentowy stosunek zysku do przychodu):
+  
+  $$Profit_Margin% = DIVIDE([Total Profit],[Total Revenue],0)$$
+
+### Wizualizacja danych i wnioski
+Pierwotna koncepcja zakładała użycie wykresu bąbelkowego (bubble chart), gdzie oś X stanowiły kategorie, oś Y – Total Profit, a wielkość bąbelka odpowiadała marży.  
+  <img width="1701" height="819" alt="image" src="https://github.com/user-attachments/assets/607d9ebb-04f9-4534-830d-f1c119c75e3c" />
+
+  Jednak przy 25 kategoriach wykres stał się nieczytelny – znaczniki nakładały się na siebie, a etykiety osi były ucięte. Aby poprawić przejrzystość, zmieniono typ wizualizacji na wykres kombi (Line and stacked column chart). W tej konfiguracji słupki reprezentują zysk kwotowy (oś Y), a linia pokazuje rentowność procentową (oś pomocnicza Y).
+  
+W projekcie świadomie zastosowano teorię koła kolorów, aby nadać raportowi profesjonalny charakter:
+- **Blue (Primary):** Wykorzystany dla słupków (Total Profit) jako kolor budujący zaufanie i czytelność struktury.
+- **Gold/Yellow (Accent):** Kolor dopełniający dla linii (Profit Margin %), pozwalający na błyskawiczną identyfikację anomalii rentowności na tle wolumenu zysku.
+- **Dark Mode:** Ciemne tło zostało wybrane w celu zminimalizowania zmęczenia wzroku i uwydatnienia nasycenia barw kluczowych metryk.
+
+<img width="1282" height="499" alt="image" src="https://github.com/user-attachments/assets/76183362-58e4-4eb9-8dad-cef41b94d016" />
+
+### Final Dashboard Overview
+
+Ostateczny wynik prac to interaktywny dashboard, który łączy szczegółową analizę kategorii z ogólnymi wskaźnikami efektywności (KPI). Dzięki zastosowaniu kart z sumarycznymi wynikami, odbiorca może błyskawicznie ocenić globalną kondycję finansową przed przejściem do analizy poszczególnych asortymentów.
 

@@ -126,5 +126,5 @@ W projekcie świadomie zastosowano teorię koła kolorów, aby nadać raportowi 
 
 Ostateczny wynik prac to interaktywny dashboard, który łączy szczegółową analizę kategorii z ogólnymi wskaźnikami efektywności (KPI). Dzięki zastosowaniu kart z sumarycznymi wynikami, odbiorca może błyskawicznie ocenić globalną kondycję finansową przed przejściem do analizy poszczególnych asortymentów.
 
-![Dashboard](images/Executive%Profitability%Overview-%TheLook%eCommerce.png)
+![Dashboard](images/Executive_Profitability_Overview-TheLook_eCommerce.png)
 

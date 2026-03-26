@@ -5,6 +5,23 @@ Postanowiłam zapisać tu wszystkie kroki, które wykonałam podczas stworzenia 
 
 Projekt opiera się na publicznym zbiorze danych `thelook_ecommerce` w Google BigQuery. Jest to syntetyczny zbiór danych zawierający informacje o operacjach fikcyjnego sklepu odzieżowego online.
 
+Aby uzyskać pełną listę dostępnych tabel i sprawdzić ich metadane, wykorzystano widok systemowy:
+
+```
+SELECT 
+  table_name, 
+  table_type, 
+  creation_time
+FROM 
+  `bigquery-public-data.thelook_ecommerce.INFORMATION_SCHEMA.TABLES`;
+  ```
+  
+  W celu wstępnej weryfikacji zawartości konkretnej tabeli (np. products), zastosowano zapytanie z ograniczeniem liczby wierszy, co pozwala na szybki podgląd próbek danych:
+  
+  ```
+  SELECT * FROM `bigquery-public-data.thelook_ecommerce.products` LIMIT 10;
+```
+
 Baza danych składa się z 7 kluczowych tabel, które pozwalają na pełną analizę cyklu życia klienta oraz łańcucha dostaw:
 
 | Nazwa tabeli | Opis zawartości | Kluczowe zastosowanie |
@@ -42,6 +59,7 @@ Zanim przystąpiłam do analizy technicznej w SQL, zdefiniowałam główne cele 
 * **Pytanie biznesowe:** Które marki lub kategorie produktów charakteryzują się najwyższym współczynnikiem zwrotów?
 * **Kluczowe metryki:** Return Rate (%), Total Returns.
 
+---------------------------------------------------------------
 ## 3.I. Transformacja i Agregacja Danych (SQL)
 
 ### Notatnik techniczny: Analiza Rentowności
@@ -122,9 +140,99 @@ W projekcie świadomie zastosowano teorię koła kolorów, aby nadać raportowi 
 
 <img width="1282" height="499" alt="image" src="https://github.com/user-attachments/assets/76183362-58e4-4eb9-8dad-cef41b94d016" />
 
-### Final Dashboard Overview
+## Końcowy dashboard 
 
 Ostateczny wynik prac to interaktywny dashboard, który łączy szczegółową analizę kategorii z ogólnymi wskaźnikami efektywności (KPI). Dzięki zastosowaniu kart z sumarycznymi wynikami, odbiorca może błyskawicznie ocenić globalną kondycję finansową przed przejściem do analizy poszczególnych asortymentów.
 
 ![Dashboard](images/Executive_Profitability_Overview-TheLook_eCommerce.png)
 
+---------------------------------------------------------------
+
+## 3.II. Transformacja i Agregacja Danych (SQL)
+
+
+**Zadanie**: Analiza wartości klienta (LTV) i jakości ruchu (AOV, Zwroty) według źródła pozyskania.
+**Logika**:
+
+  * **Połączenie danych**: Połączyłam tabelę users (źródło ruchu) z order_items (sprzedaż), aby przypisać przychód do konkretnych kanałów marketingowych.
+
+  * **AOV (Average Order Value)**: Obliczyłam jako sumę sprzedaży podzieloną przez unikalną liczbę zamówień (DISTINCT order_id). To pozwala sprawdzić, gdzie klienci robią najwięcej "ładowanych" koszyków.
+
+  * **Monitoring zwrotów**: Wykorzystałam agregację warunkową (CASE WHEN), aby policzyć stopę zwrotów (Return Rate). Pozwala to ocenić, czy dany kanał nie sprowadza klientów "problemowych", którzy generują koszty logistyczne.
+
+  * **LTV (Customer Lifetime Value)**: Obliczyłam jako całkowity przychód wygenerowany przez źródło podzielony przez liczbę unikalnych klientów. To kluczowa metryka mówiąca o tym, ile średnio wart jest dla firmy klient z danego kanału.
+
+  * **Precyzja**: Zastosowałam ROUND(..., 2), aby zachować czytelność finansową i uniknąć błędów zaokrągleń przy walutach.
+
+  * **Ranking**: Wyniki posortowałam według LTV malejąco, aby od razu wskazać najbardziej dochodowe źródła pozyskania klientów.
+
+```
+SELECT 
+    u.traffic_source,
+    COUNT(DISTINCT u.id) AS total_customers,
+    
+    -- 1. Średnia wartość zamówienia (AOV)
+    ROUND(SUM(oi.sale_price) / COUNT(DISTINCT oi.order_id), 2) AS average_order_value,
+    
+    -- 2. Analiza zwrotów
+    COUNT(DISTINCT CASE WHEN oi.status = 'Returned' THEN oi.order_id END) AS returned_orders_count,
+    ROUND(
+      COUNT(DISTINCT CASE WHEN oi.status = 'Returned' THEN oi.order_id END) / 
+      COUNT(DISTINCT oi.order_id) * 100, 2
+    ) AS return_rate_percent,
+    
+    -- 3. Customer Lifetime Value (LTV)
+    ROUND(SUM(oi.sale_price) / COUNT(DISTINCT u.id), 2) AS customer_ltv
+
+FROM 
+    `bigquery-public-data.thelook_ecommerce.users` AS u
+JOIN 
+    `bigquery-public-data.thelook_ecommerce.order_items` AS oi 
+    ON u.id = oi.user_id
+
+GROUP BY 
+    1
+ORDER BY 
+    customer_ltv DESC;
+```
+
+W wyniku przeprowadzonego zapytania wygenerowano tabelę podsumowującą kluczowe metryki efektywności kanałów marketingowych:
+<img width="902" height="178" alt="image" src="https://github.com/user-attachments/assets/a4bf139f-b29c-44d4-ad68-0893125ca9e5" />
+
+Kluczowe wnioski z analizy (Insights):
+
+  * **Dominacja kanału Search**: Ponad połowa bazy klientów została pozyskana przez wyszukiwarkę, co czyni ją głównym filarem sprzedaży.
+
+  * **Wysoka jakość ruchu Organic**: Kanał ten charakteryzuje się najwyższymi wskaźnikami AOV (średnia wartość zamówienia) oraz LTV (wartość życiowa klienta). Oznacza to, że klienci organiczni generują wyższe przychody i wykazują większą lojalność w długim terminie.
+
+  * **Stabilna stopa zwrotów**: Niezależnie od źródła ruchu, odsetek zwrotów utrzymuje się na stałym poziomie ok. 10%, co sugeruje, że źródło pozyskania nie ma wpływu na późniejszą rezygnację z zakupu.
+
+  * **Retencja klientów**: We wszystkich kanałach wskaźnik LTV jest wyraźnie wyższy od AOV, co potwierdza, że średni klient powraca do sklepu na kolejne zakupy.
+
+Przygotowanie danych pod dashboard Power BI
+Aby umożliwić głębszą, interaktywną analizę, przygotowano dedykowaną tabelę szczegółową (tzw. flat table). Poniższy skrypt łączy dane o użytkownikach z ich zamówieniami, wzbogacając je o segmentację demograficzną:
+```
+SELECT 
+    u.id AS user_id,
+    u.traffic_source,
+    u.country,
+    u.gender,
+    u.age,
+    -- Dodajemy przedział wiekowy już na poziomie SQL, żeby ułatwić tworzenie filtrów w PBI
+    CASE 
+      WHEN u.age < 25 THEN '18-24'
+      WHEN u.age BETWEEN 25 AND 44 THEN '25-44'
+      WHEN u.age BETWEEN 45 AND 60 THEN '45-60'
+      ELSE '60+' 
+    END AS age_group,
+    oi.order_id,
+    oi.sale_price,
+    oi.status,
+    oi.created_at
+FROM 
+    `bigquery-public-data.thelook_ecommerce.users` AS u
+JOIN 
+    `bigquery-public-data.thelook_ecommerce.order_items` AS oi 
+    ON u.id = oi.user_id;
+```
+Tak przygotowany zbiór danych pozwala na dynamiczne badanie wskaźników AOV i LTV w wielu wymiarach: nie tylko według źródła ruchu, ale również w zależności od wieku, płci oraz lokalizacji geograficznej użytkowników.

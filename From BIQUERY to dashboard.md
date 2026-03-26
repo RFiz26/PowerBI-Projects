@@ -117,15 +117,15 @@ Po wyodrębnieniu tabel wymiarów (`Kategoria` oraz `Marka`) i przypisaniu im kl
 W celu przeprowadzenia rzetelnej analizy rentowności, stworzono trzy kluczowe miary:
   1. **Total Profit**(Sumaryczny zysk firmy):
     
-  $$Total Profit = SUM(Fakt_table[zysk_razem])$$
+  `Total Profit = SUM(Fakt_table[zysk_razem])`
 
   2. **Total Revenue**(Sumaryczny przychód firmy):
     
-  $$Total Revenue = SUM(Fakt_table[przychod_razem])$$
+  `Total Revenue = SUM(Fakt_table[przychod_razem])`
 
   3. **Profit Margin %**(Procentowy stosunek zysku do przychodu):
   
-  $$Profit_Margin% = DIVIDE([Total Profit],[Total Revenue],0)$$
+  `Profit_Margin% = DIVIDE([Total Profit],[Total Revenue],0)`
 
 ### Wizualizacja danych i wnioski
 Pierwotna koncepcja zakładała użycie wykresu bąbelkowego (bubble chart), gdzie oś X stanowiły kategorie, oś Y – Total Profit, a wielkość bąbelka odpowiadała marży.  
@@ -239,14 +239,15 @@ Tak przygotowany zbiór danych pozwala na dynamiczne badanie wskaźników AOV i 
 
 ## 4.II. Prezentacja danych w Power Bi
 ### Proces ETL i przygotowanie danych w Power Query
-W celu optymalizacji modelu danych, proces ETL (Extract, Transform, Load) został przeprowadzony w edytorze Power Query. Na podstawie pierwotnego zapytania z BigQuery utworzono dwie odrębne tabele poprzez mechanizm odwołania (Reference), co pozwoliło na zachowanie czystości struktury:
+W celu optymalizacji modelu danych, proces ETL (Extract, Transform, Load) został przeprowadzony w edytorze **Power Query**. Na podstawie pierwotnego zapytania z BigQuery utworzono dwie odrębne tabele poprzez mechanizm odwołania (Reference), co pozwoliło na zachowanie czystości struktury:
 
-Fact_table (Tabela Faktów): Zawiera kluczowe dane transakcyjne, w tym user_id (klucz obcy), order_id, sale_price, status oraz created_at. Dodatkowo utworzono kolumnę Date, powstałą poprzez transformację created_at (usunięcie znacznika godziny), co umożliwiło precyzyjne łączenie z kalendarzem.
+  * **Fact_table (Tabela Faktów)**: Zawiera kluczowe dane transakcyjne, w tym user_id (klucz obcy), order_id, sale_price, status oraz created_at. Dodatkowo utworzono kolumnę Date, powstałą poprzez transformację created_at (usunięcie znacznika godziny), co umożliwiło precyzyjne łączenie z kalendarzem.
 
-Dim_user (Tabela Wymiarów): Przeniesiono tu wszystkie atrybuty opisujące użytkowników. Aby zapewnić unikalność rekordów (klucz podstawowy), usunięto duplikaty w kolumnie user_id.
+  * **Dim_user (Tabela Wymiarów)**: Przeniesiono tu wszystkie atrybuty opisujące użytkowników. Aby zapewnić unikalność rekordów (klucz podstawowy), usunięto duplikaty w kolumnie user_id.
 
-
-Po wprowadzeniu danych do Power Query, zostały stworzone dwie tablice przed odwołanie do tablicy orginalnej. Jednak to Fact_table, gdzie znajduje się user_id (klucz obcy), order_id, sale_price, status, created_at oraz skopiowana kolumna crated_at jako "Date", gdzie znajdują sie sama data, bez podanych godzin. Druga tabela to dim_user, gdzie zostały przeniesione wszystkie dane na temat użytkowników, gdzie usunięto dublikaty w kolumnie user_id (klucz podstawowy). Wczytaniu danych do Power Bi, została stworzona tablica `Calendar` za pomocą skryptu: 
+### Tworzenie Tabeli Kalendarza (DAX)
+Po załadowaniu danych do modelu, w celu umożliwienia zaawansowanej analizy czasowej (Time Intelligence), utworzono dedykowaną tabelę **Calendar_table** za pomocą następującego skryptu DAX:
+ 
 ```
 Calendar_table = 
 VAR start_data = MIN(Fact_table[Data])
@@ -264,6 +265,30 @@ ADDCOLUMNS(
     "Rok-miesiąc",    FORMAT([Date], "YYYY-MM")
 )
 ```
-Zarówno dim_user oraz Calendar_table zostały połączone relacją, jak jest to przedstawione na grafice:
+### Architektura Modelu (Star Schema)
+Tabele Dim_user oraz Calendar_table zostały połączone z centralną tabelą faktów relacjami typu jeden-do-wielu (1:*), tworząc efektywny schemat gwiazdy. Taka architektura pozwala na dynamiczne filtrowanie wyników sprzedaży (miary AOV, LTV) przez pryzmat czasu, demografii oraz lokalizacji użytkowników.
+
 <img width="1102" height="669" alt="image" src="https://github.com/user-attachments/assets/7c80cbff-f4ce-4179-b6de-afb02e6fac17" />
 
+### Implementacja miar DAX
+
+Do przeprowadzenia analiz zostały stworzone miary:
+  1. **Total Customers**(Liczba klientów):
+    
+  `Total Customers = DISTINCTCOUNT('Dim_user'[user_id])`
+
+  2. **Average Order Value**(Średnia Wartość Zamówienia (AOV)):
+    
+  `Average Order Value = DIVIDE(SUM('Fact_table'[sale_price]), DISTINCTCOUNT('Fact_table'[order_id]))`
+
+  3. **Returned Orders Count**(Liczba Zwrotów):
+    
+  `Returned Orders Count = CALCULATE(DISTINCTCOUNT('Fact_table'[order_id]), 'Fact_table'[status] = "Returned")`
+
+  4. **Return Rate %**(Procent Zwrotów):
+  
+  `Return Rate % = DIVIDE([Returned Orders Count],DISTINCTCOUNT('Fact_table'[order_id])) * 100`
+
+  5. **Customer LTV**(Wartość Życiowa Klienta):
+  
+  `Customer LTV = DIVIDE(SUM('Fact_table'[sale_price]), DISTINCTCOUNT('Dim_user'[user_id]))`

@@ -292,3 +292,18 @@ Do przeprowadzenia analiz zostały stworzone miary:
   5. **Customer LTV**(Wartość Życiowa Klienta):
   
   `Customer LTV = DIVIDE(SUM('Fact_table'[sale_price]), DISTINCTCOUNT('Dim_user'[user_id]))`
+
+### Zaobserwowane błędy podczas wykonania dashboardu
+
+Podczas wykonywania dashboardu zostały zaobserowane dwa niepoprawne elementy:
+  * Dwa państwa były zapisywane na dwa sposoby (w języku ojczystym i angielskim), Deutschland-Germany, España-Spain 
+  * Obecność odstającego wyniku (Outliers) 
+
+  **WAŻNE!** Odstające wyniki raczej świadczą o błędach, fałszywych danych niż o "wielkim" odkryciu!!
+
+<img width="1388" height="572" alt="image" src="https://github.com/user-attachments/assets/a7bbf600-086e-4f0b-9b1b-d60559177b2a" />
+
+Z tego powodu wróciłam do Power Query:
+  * Ujednoliciłam nazwy państw ( `Przekształć`->`Zamienianie Wartości`). 
+  * Sprawdziłam statystyki `sale-price` ( Srednia 60, Odchylenie 68, Min 1.5, Max 903). Ewidentnie tamte wartości to outliers, dlatego zostały odfiltrowane wszystkie wartości większe nić 300. Wartość ta została wybrania z wykorzystaniem reguły **Trzech Sigm ($3\sigma$)** (* $60 + (3 \times 68) = 264$ zaokrąglenie do 300) 
+  <img width="1919" height="1076" alt="image" src="https://github.com/user-attachments/assets/19b93b44-7c6f-4632-bfee-0dbcc0962b68" />

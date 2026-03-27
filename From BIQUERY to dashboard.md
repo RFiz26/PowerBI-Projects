@@ -277,9 +277,22 @@ Do przeprowadzenia analiz zostały stworzone miary:
     
   `Total Customers = DISTINCTCOUNT('Dim_user'[user_id])`
 
-  2. **Average Order Value**(Średnia Wartość Zamówienia (AOV)):
+  2. **Average Order Value**(Średnia Wartość Zamówienia (AOV)) z pominięciem zamówień zwróconych i anulowanych:
     
-  `Average Order Value = DIVIDE(SUM('Fact_table'[sale_price]), DISTINCTCOUNT('Fact_table'[order_id]))`
+```
+Average Order Value (Net) = 
+VAR SuccessfulOrders = 
+    FILTER(
+        'Fact_table', 
+        'Fact_table'[status] <> "Returned" && 
+        'Fact_table'[status] <> "Cancelled"
+    )
+RETURN
+DIVIDE(
+    CALCULATE(SUM('Fact_table'[sale_price]), SuccessfulOrders), 
+    CALCULATE(DISTINCTCOUNT('Fact_table'[order_id]), SuccessfulOrders)
+)
+```
 
   3. **Returned Orders Count**(Liczba Zwrotów):
     
@@ -291,7 +304,16 @@ Do przeprowadzenia analiz zostały stworzone miary:
 
   5. **Customer LTV**(Wartość Życiowa Klienta):
   
-  `Customer LTV = DIVIDE(SUM('Fact_table'[sale_price]), DISTINCTCOUNT('Dim_user'[user_id]))`
+```
+Customer LTV (Net Revenue) = 
+VAR TotalNetSales = 
+    CALCULATE(
+        SUM('Fact_table'[sale_price]), 
+        'Fact_table'[status] <> "Returned" && 'Fact_table'[status] <> "Cancelled"
+    )
+RETURN
+    DIVIDE(TotalNetSales, [Total Customers])
+```
 
 ### Zaobserwowane błędy podczas wykonania dashboardu
 

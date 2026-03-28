@@ -334,7 +334,8 @@ Podczas wykonywania dashboardu zostały zaobserowane dwa niepoprawne elementy:
 Z tego powodu wróciłam do Power Query:
   * Ujednoliciłam nazwy państw ( `Przekształć`->`Zamienianie Wartości`). 
   * Sprawdziłam statystyki `sale-price` ( Srednia 60, Odchylenie 68, Min 1.5, Max 903). Ewidentnie tamte wartości to outliers. Zastosowałam **Regułę Trzech Sigm ($3\sigma$)**, aby odfiltrować błędy systemowe. Mimo że matematyczny próg $3\sigma$ wynosił 264, zdecydowałam się na konserwatywne zaokrąglenie go do 300. Pozwoliło to na zachowanie w zbiorze autentycznych produktów z segmentu premium, jednocześnie skutecznie odcinając ekstremalne anomalie (max 903), które przy odchyleniu standardowym 68 są statystycznie niemożliwe dla normalnych transakcji.
- 
-  <img width="1919" height="1076" alt="image" src="https://github.com/user-attachments/assets/19b93b44-7c6f-4632-bfee-0dbcc0962b68" />
+
+<img width="1919" height="1076" alt="image" src="https://github.com/user-attachments/assets/19b93b44-7c6f-4632-bfee-0dbcc0962b68" />
 
 Po poprawieniu danych został stworzony dashboard. Przez to, że najbardziej widoczna różnica była widoczna w ilości użytkowników ( Total Customers) w zależności od źródła została wykorzystana w na mapie. Przez niewielkie różnice w AOV i LTV w zależności od źródła, została podjęta decyzja o tym, aby dodać takie parametry jak wiek czy płeć. Całość dashboardu przedstawiona jest poniżej :
+![Dashboard](images/Marketing_Attribution.png)

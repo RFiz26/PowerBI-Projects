@@ -339,3 +339,45 @@ Z tego powodu wróciłam do Power Query:
 
 Po poprawieniu danych został stworzony dashboard. Przez to, że najbardziej widoczna różnica była widoczna w ilości użytkowników ( Total Customers) w zależności od źródła została wykorzystana w na mapie. Przez niewielkie różnice w AOV i LTV w zależności od źródła, została podjęta decyzja o tym, aby dodać takie parametry jak wiek czy płeć. Całość dashboardu przedstawiona jest poniżej :
 ![Dashboard](images/Marketing_Attribution.png)
+
+--------------------------------
+## 3.III. Transformacja i Agregacja Danych (SQL)
+
+
+**Zadanie**: Określenie Return Rate, aby określić, które marki 
+**Logika**:
+
+  * **Połączenie danych**: Połączyłam tabelę products (produkty) z order_items (sprzedaż), aby przypisać zwroty do konkretnych kategorii produktów.
+
+  * **Return Rate**: Obliczyłam ją jako stosunek liczby produktów ze statusem Returned do wszystkich sprzedanych sztuk. Wykorzystałam funkcję CASE WHEN, aby stworzyć "licznik" tylko dla zwróconych przedmiotów. Pozwala to precyzyjnie wskazać, które grupy produktów najczęściej wracają do magazynu.
+
+  * **Bezpieczne dzielenie**: Zastosowałam funkcję SAFE_DIVIDE, aby uniknąć błędów matematycznych (np. dzielenia przez zero), co gwarantuje stabilność zapytania przy dużej liczbie marek.
+
+  * **Filtracja istotności (Statystyczna próba)**: Dodałam warunek HAVING liczba_sprzedanych > 50. Jest to kluczowy krok biznesowy – odrzucam marki o bardzo małej sprzedaży, gdzie pojedynczy zwrot mógłby sztucznie zawyżyć wynik do 100%, wprowadzając w błąd co do skali problemu.
+
+  * **Identyfikacja strat**: Dzięki posortowaniu wyników od najwyższego procentu zwrotów (ORDER BY procent_zwrotow DESC), od razu widzę "czarną listę" marek i kategorii, które generują największe koszty logistyczne i operacyjne.
+
+  * **Precyzja i przejrzystość**: Podobnie jak w poprzednich krokach, użyłam ROUND(..., 2), aby wynik był czytelny dla odbiorcy biznesowego i łatwy do zaprezentowania na wykresie.
+```
+SELECT 
+    p.category AS kategoria,
+    p.brand AS marka,
+    COUNT(oi.id) AS liczba_sprzedanych,
+    -- Liczymy tylko te wiersze, gdzie status to 'Returned'
+    COUNT(CASE WHEN oi.status = 'Returned' THEN 1 END) AS liczba_zwrotow,
+    -- Obliczamy procent zwrotów (Return Rate)
+    ROUND(
+      SAFE_DIVIDE(COUNT(CASE WHEN oi.status = 'Returned' THEN 1 END), COUNT(oi.id)) * 100, 
+    2) AS procent_zwrotow
+FROM `bigquery-public-data.thelook_ecommerce.order_items` AS oi
+JOIN `bigquery-public-data.thelook_ecommerce.products` AS p ON oi.product_id = p.id
+GROUP BY 1, 2
+HAVING liczba_sprzedanych > 50 -- Filtrujemy małe marki, żeby jeden zwrot nie robił 100%
+ORDER BY procent_zwrotow DESC;
+```
+
+Stworzona tabela została załadowana do Power Query, w której stworzono schemat gwiazdy podobny do zadania 1.
+Okazało się, że automatycznie relacje zostały źle stworzone, dlatego najleżało je poprawić ręcznie: 
+<img width="1046" height="569" alt="image" src="https://github.com/user-attachments/assets/e3234919-e247-487f-8122-8ea620329310" />
+
+

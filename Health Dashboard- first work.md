@@ -14,24 +14,28 @@ The data is sourced from Kaggle (Holistic Health & Lifestyle Score Dataset). The
 - BMI	
 - Alcohol	
 - Smoking
-- Overakk_Health_Score
+- Overall_Health_Score
 - Health_Status
 
 From these factors, I selected BMI and Smoking—due to their significant public perception as health drivers—and Mindfulness, which data analysis revealed to have the strongest impact on health status.
+
+## Tools Used
+ * **Data Source**: Kaggle (Holistic Health & Lifestyle Score Dataset)
+ * **Analysis & Visualization**: Power BI 
 
 ## Key Metrics
 - Average Health Score: 78,23  
 - % Poor Health Cases: 4,18%
 
-## Visualizations
-  * Stress level trends relative to health status.
-  * Distribution of Mindfulness and BMI levels by health status.
-  * Impact of smoking on health (Scatterplot + Trendline).
-  * Comparative analysis of key differences between "Good" and "Poor" health statuses.
+## Visualizations & Insights
+  * **Stress vs. Health**: A clear downward trend shows that as health status improves from "Poor" to "Good," average stress levels drop from 5.5 to 4.8.
+  * **The Mindfulness Factor**: This is the strongest differentiator. Individuals in "Good" health have a mindfulness score nearly 6x higher (19.0) than those in "Poor" health (3.3).
+  * **Smoking Impact**: The scatterplot confirms a negative correlation between smoking habits and the overall health score, reinforced by a visible trendline.
+  * **BMI Paradox**: The analysis shows that high mental well-being can correlate with better health outcomes regardless of the BMI category.
 
 ## Conclusions
-- Higher mental well-being scores correlate with better health status across all BMI categories. 
-- Individuals with "Poor" health status consistently exhibit higher stress levels and lower mindfulness scores.
+* **Mental Health is Physical Health**: Psychological factors like mindfulness and stress management are primary indicators of overall health status.
+* **Actionable Insight**: Health programs should focus not only on physical habits (smoking, BMI) but also on mental resilience and mindfulness training to effectively improve health outcomes.
 
 ![Dashboard](images/Health-first%20dashboard.png)
 

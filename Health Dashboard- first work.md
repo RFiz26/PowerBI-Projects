@@ -1,10 +1,10 @@
 # Health Dashboard
 
 ## Business Problem
-Analiza wpływu czynników psychicznych (stress, mindfulness, smoking) na stan zdrowia.
+An analysis of how psychological factors (stress, mindfulness) and lifestyle choices (smoking) impact overall health status.
 
-## Dane i model
-Dane pochodzą z serwisu Kaggle (Holistic Health & Lifestyle Score Dataset). Tabela zawierała następujące kolumny:
+## Data and Model
+The data is sourced from Kaggle (Holistic Health & Lifestyle Score Dataset). The original dataset included the following columns:
 - Physical_Activity	
 - Nutrition_Score	
 - Stress_Level	
@@ -17,21 +17,21 @@ Dane pochodzą z serwisu Kaggle (Holistic Health & Lifestyle Score Dataset). Tab
 - Overakk_Health_Score
 - Health_Status
 
-Spośród wszystkich czynników wybrałam **BMI** i **Smoking** — ponieważ są to czynniki, które w opinii publicznej mają największy wpływ na zdrowie — oraz **Mindfulness**, który według analizy danych miał największy wpływ na stan zdrowia.
+From these factors, I selected BMI and Smoking—due to their significant public perception as health drivers—and Mindfulness, which data analysis revealed to have the strongest impact on health status.
 
-## Kluczowe metryki
+## Key Metrics
 - Average Health Score: 78,23  
 - % Poor Health Cases: 4,18%
 
-## Wizualizacje
-- Trend poziomu stresu względem stanu zdrowia  
-- Rozkład mindfulness i poziomu BMI według stanu zdrowia  
-- Wpływ palenia na zdrowie (scatterplot + trendline)  
-- Porównanie kluczowych różnic między dobrym a złym stanem zdrowia
+## Visualizations
+  * Stress level trends relative to health status.
+  * Distribution of Mindfulness and BMI levels by health status.
+  * Impact of smoking on health (Scatterplot + Trendline).
+  * Comparative analysis of key differences between "Good" and "Poor" health statuses.
 
-## Wnioski
-- Wyższe wyniki mental well-being korelują z lepszym stanem zdrowia we wszystkich kategoriach BMI  
-- Osoby ze złym stanem zdrowia mają wyższy poziom stresu i niższy mindfulness
+## Conclusions
+- Higher mental well-being scores correlate with better health status across all BMI categories. 
+- Individuals with "Poor" health status consistently exhibit higher stress levels and lower mindfulness scores.
 
 ![Dashboard](images/Health-first%20dashboard.png)
 

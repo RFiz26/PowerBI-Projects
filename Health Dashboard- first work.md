@@ -37,5 +37,5 @@ From these factors, I selected BMI and Smoking—due to their significant public
 * **Mental Health is Physical Health**: Psychological factors like mindfulness and stress management are primary indicators of overall health status.
 * **Actionable Insight**: Health programs should focus not only on physical habits (smoking, BMI) but also on mental resilience and mindfulness training to effectively improve health outcomes.
 
-![Dashboard](images/Health-first%20dashboard.png)
+![Dashboard](Images/Health-first%20dashboard.png)
 

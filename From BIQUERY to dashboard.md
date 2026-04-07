@@ -150,7 +150,7 @@ W projekcie świadomie zastosowano teorię koła kolorów, aby nadać raportowi 
 
 Ostateczny wynik prac to interaktywny dashboard, który łączy szczegółową analizę kategorii z ogólnymi wskaźnikami efektywności (KPI). Dzięki zastosowaniu kart z sumarycznymi wynikami, odbiorca może błyskawicznie ocenić globalną kondycję finansową przed przejściem do analizy poszczególnych asortymentów.
 
-![Dashboard](images/Executive_Profitability_Overview-TheLook_eCommerce.png)
+![Dashboard](Image/Executive_Profitability_Overview-TheLook_eCommerce.png)
 
 ---------------------------------------------------------------
 
@@ -338,7 +338,7 @@ Z tego powodu wróciłam do Power Query:
 <img width="1919" height="1076" alt="image" src="https://github.com/user-attachments/assets/19b93b44-7c6f-4632-bfee-0dbcc0962b68" />
 
 Po poprawieniu danych został stworzony dashboard. Przez to, że najbardziej widoczna różnica była widoczna w ilości użytkowników ( Total Customers) w zależności od źródła została wykorzystana w na mapie. Przez niewielkie różnice w AOV i LTV w zależności od źródła, została podjęta decyzja o tym, aby dodać takie parametry jak wiek czy płeć. Całość dashboardu przedstawiona jest poniżej :
-![Dashboard](images/Marketing_Attribution.png)
+![Dashboard](Image/Marketing_Attribution.png)
 
 --------------------------------
 ## 3.III. Transformacja i Agregacja Danych (SQL)

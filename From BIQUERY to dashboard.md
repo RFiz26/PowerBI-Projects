@@ -405,9 +405,8 @@ Do prezentacji wolumenu sprzedaży oraz analizy zwrotów w podziale na kategorie
   * **Interaktywność**: Dodałam fragmentator (Slicer) umożliwiający filtrowanie danych według marek. Aby zapewnić wartość analityczną, slicer obejmuje wyłącznie marki posiadające ofertę w co najmniej dwóch kategoriach produktowych, co pozwala na rzetelne porównanie wyników.
 
 ## Końcowy dashboard 
-Na podstawie danych zaprezentowanych na dashboardzie można zauważyć, że nie ma różnic- oznacza to, że problem zwrotów jest systemowy, a nie punktowy (np. nie wynika z wady konkretnej kategorii).
+Na podstawie analizy zaprezentowanej na dashboardzie można wysnuć wniosek, że wskaźnik zwrotów jest jednolity dla całego asortymentu. Brak wyraźnych odchyleń między kategoriami sugeruje, że problem zwrotów ma charakter systemowy, a nie punktowy (nie wynika z wad konkretnej grupy produktów).
 
+Głównym czynnikiem generującym liczbę zwrotów jest po prostu wolumen sprzedaży – oba parametry są ze sobą ściśle skorelowane, co widoczne jest na wykresie trendu.
+![Dashboard](Image/Product_Return_Insights&Trends.png)
 
-
-
-![Dashboard](Image/Executive_Profitability_Overview-TheLook_eCommerce.png)

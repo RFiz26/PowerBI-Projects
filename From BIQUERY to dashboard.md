@@ -405,3 +405,9 @@ Do prezentacji wolumenu sprzedaży oraz analizy zwrotów w podziale na kategorie
   * **Interaktywność**: Dodałam fragmentator (Slicer) umożliwiający filtrowanie danych według marek. Aby zapewnić wartość analityczną, slicer obejmuje wyłącznie marki posiadające ofertę w co najmniej dwóch kategoriach produktowych, co pozwala na rzetelne porównanie wyników.
 
 ## Końcowy dashboard 
+Na podstawie danych zaprezentowanych na dashboardzie można zauważyć, że nie ma różnic- oznacza to, że problem zwrotów jest systemowy, a nie punktowy (np. nie wynika z wady konkretnej kategorii).
+
+
+
+
+![Dashboard](Image/Executive_Profitability_Overview-TheLook_eCommerce.png)

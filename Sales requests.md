@@ -34,8 +34,11 @@
 ### Key Business Insights:
 
  * **Primary Acquisition Drivers**: In terms of volume, Search is the clear global leader in customer acquisition, followed closely by Organic traffic. This highlights that search engine visibility (both paid and SEO) is the fundamental pillar of the company’s customer base growth.
+
  * **Male Demographic Dominance (LTV)**: Customer Lifetime Value (LTV) is significantly higher for men across all marketing channels, consistently exceeding $100, compared to approximately $85-$90 for women. This suggests a strategic opportunity to optimize product offerings or marketing campaigns tailored to female customers.
+
  * **Email Channel Efficiency**: While Search brings in the highest volume of users, Email yields the highest Average Order Value (AOV), especially in the 45-60+ age groups, making it the most effective channel for maximizing individual basket size.
+
  * **Traffic Quality Stability**: Despite the variance in volume between channels like Search and Facebook, the AOV remains remarkably stable (approx. $78–$82). This indicates a consistent acquisition strategy that attracts customers with similar purchasing power across all platforms.
 -----------------------------------------------------------
 ### III. Operational Optimization (Returns Analysis)

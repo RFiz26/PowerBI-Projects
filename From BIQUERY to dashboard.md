@@ -133,7 +133,7 @@ W celu przeprowadzenia rzetelnej analizy rentowności, stworzono trzy kluczowe m
   
   `Profit_Margin% = DIVIDE([Total Profit],[Total Revenue],0)`
 
-### Wizualizacja danych i wnioski
+### Wizualizacja danych
 Pierwotna koncepcja zakładała użycie wykresu bąbelkowego (bubble chart), gdzie oś X stanowiły kategorie, oś Y – Total Profit, a wielkość bąbelka odpowiadała marży.  
   <img width="1701" height="819" alt="image" src="https://github.com/user-attachments/assets/607d9ebb-04f9-4534-830d-f1c119c75e3c" />
 
@@ -376,8 +376,32 @@ HAVING liczba_sprzedanych > 50 -- Filtrujemy małe marki, żeby jeden zwrot nie 
 ORDER BY procent_zwrotow DESC;
 ```
 
-Stworzona tabela została załadowana do Power Query, w której stworzono schemat gwiazdy podobny do zadania 1.
-Okazało się, że automatycznie relacje zostały źle stworzone, dlatego najleżało je poprawić ręcznie: 
-<img width="1046" height="569" alt="image" src="https://github.com/user-attachments/assets/e3234919-e247-487f-8122-8ea620329310" />
+## 4.III. Prezentacja danych w Power Bi
+### Proces ETL i przygotowanie danych w Power Query
+Dane zostały zaimportowane i przygotowane w edytorze Power Query. Proces transformacji objął czyszczenie danych oraz stworzenie struktury opartej na schemacie gwiazdy (Star Schema), analogicznie do założeń z poprzedniego etapu projektu.
+### Architektura Modelu (Star Schema)
+Podczas budowy modelu zweryfikowano automatycznie utworzone relacje. Ze względu na błędy w autodetekcji, powiązania między tabelami zostały skonfigurowane ręcznie, co zapewniło poprawną propagację filtrów i integralność danych.
 
+<img width="1046" height="569" alt="Star Schema Model" src="https://github.com/user-attachments/assets/e3234919-e247-487f-8122-8ea620329310" />
 
+### Implementacja miar DAX
+
+Do przeprowadzenia analiz zostały stworzone miary:
+  1. **Units Sold**(Sprzedane jednostki):
+    
+  `Units Sold = SUM(Fact_Table[liczba_sprzedanych])`
+
+  2. **Units Returned**(Zwróceone jednostki):
+    
+`Units Returned = SUM(Fact_Table[liczba_zwrotow])`
+
+  3. **Percents_return**(Procent zwrotów):
+    
+  `Percents_return = AVERAGE(Fact_Table[procent_zwrotow])`
+
+### Wizualizacja i decyzje prezentacyjne
+Do prezentacji wolumenu sprzedaży oraz analizy zwrotów w podziale na kategorie produktowe wykorzystano wykresy słupkowe oraz wykresy kombinowane (Sales vs Returns).
+  * **Optymalizacja wizualna**: Ponieważ wskaźnik zwrotów dla wszystkich kategorii oscyluje w wąskim przedziale 9–11%, zdecydowałam się na celowe ograniczenie zakresu osi X (od 7% do 12%). Zabieg ten pozwala uwydatnić różnice między kategoriami bez wprowadzania odbiorcy w błąd, przy jednoczesnym zachowaniu czytelności etykiet.
+  * **Interaktywność**: Dodałam fragmentator (Slicer) umożliwiający filtrowanie danych według marek. Aby zapewnić wartość analityczną, slicer obejmuje wyłącznie marki posiadające ofertę w co najmniej dwóch kategoriach produktowych, co pozwala na rzetelne porównanie wyników.
+
+## Końcowy dashboard 

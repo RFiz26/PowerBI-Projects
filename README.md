@@ -7,7 +7,7 @@ This repository contains a collection of data analysis projects developed using 
 * **[Sales requests.md](./Sales%20requests.md)**: A detailed walkthrough of an E-commerce profitability analysis (116k+ transactions).
 * **[Health Dashboard- first work.md](./Health%20Dashboard-%20first%20work.md)**: Lifestyle and health correlation analysis using Power BI.
 * **[Troubleshooting Log.md](./Troubleshooting%20Log.md)**: A technical journal documenting real-world problems encountered and resolved during the development process.
-* **[From BIGQUERY to dashboard.md](./From%20BIGQUERY%20to%20dashboard.md)**: Technical guide on setting up the data pipeline from Google BigQuery.
+* **[From BIGQUERY to dashboard.md](./From%20BIGQUERY%20to%20dashboard.md)**: End-to-End Data Pipeline (Note: This documentation is written in Polish as it serves as a detailed technical walkthrough of my learning process. Screenshots are provided to visualize each stage.)
 
 ## 🛠️ Tech Stack
 * **Analysis:** Power BI (DAX, Power Query), Python (Pandas).

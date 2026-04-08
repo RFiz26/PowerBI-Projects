@@ -9,94 +9,104 @@
 
 
 
-**Kod M (Power Query):**
+**M Code (Power Query):**
 ```powerquery
-#"Zmieniono typ z ustawieniami regionalnymi" = Table.TransformColumnTypes(#"Changed Type", {{"Physical_Activity", type number}}, "en-US")
+#"Changed Type with Locale" = Table.TransformColumnTypes(#"Changed Type", {{"Physical_Activity", type number}}, "en-US")
 ```
-## [2026-01-30] Weryfikacja jakości danych (Data Profiling) w Power Query
+## [2026-01-30] Data Profiling in Power Query
 
-**Problem:** Chciałam sprawdzić jakość danych (puste wartości błędy,duplikaty, rozkład danych, wartości ekstremalne)
+**Problem:** I needed to verify data quality (nulls, errors, duplicates, data distribution, and outliers).
 
-**Rozwiązanie:** Zastosowanie narzędzi profilowania danych w Power Query (Zakładka **Widok**), aby szybko ocenić stan zbioru danych przed dalszą obróbką.
+**Solution**: Enabled Data Profiling tools in Power Query (**View** tab) to quickly assess the dataset's state before further processing.
 
-**Użyte funkcje:**
-* **Jakość kolumn (Column Quality):** Pozwala szybko sprawdzić procent danych prawidłowych (Valid), błędów (Errors) oraz pustych (Empty).
-* **Rozkład kolumn (Column Distribution):** Wyświetla wykres słupkowy pokazujący liczbę **unikatowych** (Unique) i **odrębnych** (Distinct)  wartości w kolumnie. (**Jeżeli Unique=Distinct <- nie ma dublikatów**)
-* **Profil kolumn (Column Profile):** Wyświetla szczegółowe statystyki (Minimum, Maximum, Średnia, Odchylenie standardowe) oraz histogram dla zaznaczonej kolumny. <- tutaj można popatrzeć na **ekstrema** czy mają sens
-### Kluczowe pojęcia (Data Profiling):
-W sekcji "Rozkład kolumn" Power BI podaje dwie wartości, które łatwo pomylić:
+**Features used**:
 
-| Pojęcie | Definicja | Przykład `[1, 1, 2, 3]` |
+   * **Column Quality**: Provides a quick check of the percentage of Valid, Error, and Empty data.
+
+   * **Column Distribution**: Displays a bar chart showing the number of Distinct and Unique values. (If Unique = Distinct, there are no duplicates).
+
+   * **Column Profile**: Shows detailed statistics (Min, Max, Average, Standard Deviation) and a histogram. Useful for identifying nonsensical outliers.
+
+
+### Key Concepts (Data Profiling):
+In the "Column Distribution" section, Power BI provides two values that are often confused:
+
+| Concept | Definition | Example `[1, 1, 2, 3]` |
 | :--- | :--- | :--- |
-| **Odrębne (Distinct)** | Wszystkie różne wartości (każda liczona raz). | **3** (wartości: 1, 2, 3) |
-| **Unikatowe (Unique)** | Wartości, które wystąpiły tylko jeden jedyny raz. | **2** (wartości: 2, 3) |
+| **Distinct** | All different values (each counted once). | **3** (values: 1, 2, 3) |
+| **Unique** | Values that appear exactly once. | **2** (values: 2, 3) |
 
 <img width="1491" height="987" alt="image" src="https://github.com/user-attachments/assets/9d41d2ba-27f3-4443-94b8-c10decf65f7b" />
 
-## [2026-02-10] Załadowanie danych z Google BigQuery
+## [2026-02-10] Loading Data from Google BigQuery
 
-**Problem** Podczas próby ściągnięcia danych z systemu Google BigQuery (Pobierz dane->Więcej...->Google BigQuery-> Połącz) pojawił się problem
+**Problem** Encountered an error while trying to fetch data from Google BigQuery (`Get Data` -> `More...` -> `Google BigQuery` -> `Connect`).
 <img width="975" height="609" alt="image" src="https://github.com/user-attachments/assets/91f7e60d-cd13-40e8-b74b-2d4f9cc4b0b2" />
-**Próba 1** Zainstalowanie 64-bitowowego sterownika ODBC dla BigQuery.
-    **Rezultat** Błąd dalej występował
-**Próba 2** Wyłączenie Google BigQuery Storage API (Sugestia Google Gemini)
-  Plik -> Opcje i ustawienia -> Opcje
+
+
+**Attempt 1**: Installed the 64-bit ODBC driver for BigQuery.
+
+   **Result**: The error persisted.
+
+**Attempt 2**: Disabled the Google BigQuery Storage API (suggested by AI troubleshooting).
+
+   Path: `File` -> `Options and settings` -> `Options`
+
 <img width="1001" height="800" alt="image" src="https://github.com/user-attachments/assets/405c11a4-a1eb-42db-846d-02e76faed85e" />
 <img width="998" height="793" alt="image" src="https://github.com/user-attachments/assets/45644cd1-fd58-40ef-a590-9df7fd121658" />
 
-  **Rezultat** Problem zniknął, dane zostały załadowane
+**Result**: The issue was resolved, and the data loaded successfully.
 
-## [2026-03-16] Zwiększenie się liczby wartości odrębnych w tabeli po usunięciu dublikatów
-**Problem**: Wzrost liczby wartości odrębnych (z 579 do 1000) po wykonaniu operacji usunięcia duplikatów w Power Query.
+## [2026-03-16] Increase in Distinct Values After Removing Duplicates
+**Problem**: The number of distinct values unexpectedly increased (from 579 to 1000) after performing a "Remove Duplicates" operation in Power Query.
 
-**Przyczyna**: Wynika to z domyślnego sposobu działania Edytora Power Query, który profiluje dane jedynie na podstawie pierwszych 1000 wierszy. Po usunięciu powtarzających się rekordów, struktura próbki uległa zmianie, co wpłynęło na wyświetlane statystyki.
+**Cause**: This is due to the default behavior of the Power Query Editor, which profiles data based only on the first 1000 rows. After removing duplicates, the sample structure changed, affecting the displayed statistics.
 
-**Rozwiązanie**: Aby uzyskać rzetelne informacje o całym zbiorze danych, należy zmienić tryb profilowania:
+**Solution**: To get accurate information for the entire dataset, change the profiling mode:
 
-   1.Spójrz na pasek stanu w lewym dolnym rogu okna Power Query.
+   1.Look at the status bar in the bottom-left corner of the Power Query window.
 
-   2.Kliknij komunikat: `Profilowanie kolumn na podstawie 1000 pierwszych wierszy.`
+   2.Click the message: `Column profiling based on top 1000 rows`.
 
-   3.Zmień opcję na: `Profilowanie kolumn na podstawie całego zestawu danych.`
+   3.Select: `Column profiling based on entire data set`.
 
-## [2026-03-16] Problem "płaskiej linii" na wykresach (Błędy relacji i miar)
-**Problem**: Po stworzeniu miar DAX (np. `Total Profit`), wykresy z podziałem na kategorie wyświetlały tę samą wartość dla każdego punktu (linia prosta), mimo że dane źródłowe były zróżnicowane.
+## [2026-03-16] "Flat Line" Issue in Charts (Relationship & Measure Errors)
+**Problem**: After creating DAX measures (e.g., `Total Profit`), category charts displayed the same value for every data point (a flat line), even though the source data was varied.
 
-**Próba 1**: Weryfikacja relacji między tabelami
-W widoku modelu sprawdzono istnienie relacji między tabelami wymiarów (Kategoria, Marka) a tabelą faktów oraz poprawność kierunku filtrowania.
+**Attempt 1**: Verifying Table Relationships I checked the Model View for existing relationships between dimension tables (Category, Brand) and the fact table, ensuring the filtering direction was correct.
 
-   **Rozwiązanie:** Usunięcie i stworzenie nowych relacji, gdzie został ustawiony kierunek filtrowania na Pojedynczy (od wymiaru "1" do faktów "*") lub Oba. 
+   **Solution**: Recreated the relationships, setting the cross-filter direction to "Single" (from the "1" dimension side to the "*" fact side).
 
-   **Rezultat** Problem nadal występował – wykresy nie reagowały na filtrowanie.
+   **Result**: The problem persisted – charts were still not responding to filtering.
 
-**Próba 2**: Weryfikacja kontekstu miar DAX
-Analiza formuły wykazała błąd w odwołaniu do źródła danych.
+**Attempt 2**: Verifying DAX Measure Context Formula analysis revealed an error in the data source reference.
 
-**Błąd**: Miara `Total Profit = SUM('Oryginalna_Tabela'[zysk_razem])` odwoływała się do tabeli technicznej (źródłowej), która nie posiadała relacji z nowymi tabelami wymiarów.
+   **Error**: The measure `Total Profit = SUM('Original_Table'[total_profit])` was referencing the technical (staging) table, which had no relationships with the new dimension tables.
 
-**Rozwiązanie**: Aktualizacja kodu DAX, aby sumował kolumny bezpośrednio z nowej tabeli faktów. Poprawa: `Total Profit = SUM('Fakt_table'[zysk_razem])`
+   **Solution**: Updated the DAX code to sum columns directly from the new fact table.
 
+   Corrected formula: `Total Profit = SUM('Fact_table'[total_profit])`
 
-**Wnioski na przyszłość**:
+**Key Takeaways**:
 
-   * **Kierunek filtrowania**: Zawsze sprawdzaj kierunek strzałek w Widoku Modelu – w schemacie gwiazdy (Star Schema) powinny one wskazywać stronę tabeli faktów.
+   * **Filter Direction**: Always check the arrows in Model View – in a Star Schema, they should point towards the Fact Table.
 
-   * **Zarządzanie tabelami**: Po zakończeniu transformacji w Power Query (tworzenie duplikatów/referencji), należy wyłączyć ładowanie tabel źródłowych lub je ukryć. Zapobiega to tworzeniu miar w błędnym kontekście i poprawia czytelność modelu.
+   * **Table Management**: After finishing transformations in Power Query (creating duplicates/references), disable "Enable Load" for staging tables or hide them. This prevents creating measures in the wrong context and improves model clarity.
    
    <img width="399" height="460" alt="image" src="https://github.com/user-attachments/assets/ef86575c-a211-4d4e-932b-d8b427cfab06" />
 
-## [2026-03-30] Nie działająca relacje
 
-**Problem**: Wykresy z podziałem na marki wyświetlały tę samą wartość dla każdego punktu (linia prosta), mimo że dane źródłowe były zróżnicowane, ale przy zastosowaniu innej tabeli połączonej relacją wartości się zmieniał.
+## [2026-03-30] Inactive Relationships
 
-**Próba 1**: Stworzenie od nowa relacji 
-   **Rozwiązanie:** Usunięcie i stworzenie nowych relacji, gdzie został ustawiony kierunek filtrowania na Pojedynczy (od wymiaru "1" do faktów "*") lub Oba. 
+**Problem**: Brand-specific charts displayed flat lines, while charts using other related tables worked correctly.
 
-   **Rezultat** Problem nadal występował – wykresy nie reagowały na filtrowanie.
+**Attempt 1**: Recreating Relationships Deleted and recreated the links, ensuring "Single" or "Both" filtering directions.
 
-**Próba 2**: Aktywacja relacji
-   **Rozwiązanie:** Zaobserwowałam, że nie jest zaznaczona opcja "Aktywuj tę relację", więc została włączona
-   <img width="529" height="854" alt="image" src="https://github.com/user-attachments/assets/a8665702-c513-4ee0-b1ec-f4ac9591590e" />
+   **Result**: No change – the issue remained.
 
+**Attempt 2**: Activating the Relationship Solution: I noticed the "Make this relationship active" option was unchecked. After enabling it, the model synchronized.
 
-   **Rezultat** Problem przestał występować
+<img width="529" height="854" alt="image" src="https://github.com/user-attachments/assets/a8665702-c513-4ee0-b1ec-f4ac9591590e" />
+
+**Result**: Charts now display correct, filtered values.
+
